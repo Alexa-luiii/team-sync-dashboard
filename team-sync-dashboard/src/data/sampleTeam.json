@@ -1,0 +1,29 @@
+[
+  {
+    "id": "1",
+    "name": "Ali",
+    "country": "Pakistan",
+    "flag": "🇵🇰",
+    "timezone": "Asia/Karachi",
+    "startTime": "09:00",
+    "endTime": "17:00"
+  },
+  {
+    "id": "2",
+    "name": "John",
+    "country": "United Kingdom",
+    "flag": "🇬🇧",
+    "timezone": "Europe/London",
+    "startTime": "09:00",
+    "endTime": "17:00"
+  },
+  {
+    "id": "3",
+    "name": "Sarah",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "timezone": "America/New_York",
+    "startTime": "09:00",
+    "endTime": "17:00"
+  }
+]
