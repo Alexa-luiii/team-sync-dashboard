@@ -13,7 +13,7 @@ import { DateTime } from 'luxon';
 const Home = () => {
   const [members, setMembers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [userTimezone, setUserTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
   const handleAddMember = (newMember) => {
     const memberWithUTC = {
@@ -50,40 +50,59 @@ const Home = () => {
   const handleExportPDF = () => {
     if (members.length === 0) return;
     const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text('Team Sync Schedule', 14, 22);
-    doc.setFontSize(11);
-    doc.setTextColor(100);
-    doc.text(`Generated on ${new Date().toLocaleDateString()} (User TZ: ${userTimezone})`, 14, 30);
 
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(59, 130, 246);
+    doc.text('Team Sync Report', 14, 22);
+
+    doc.setFontSize(10);
+    doc.setTextColor(156, 163, 175);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+    doc.text(`Reference Timezone: ${userTimezone}`, 14, 35);
+
+    // Members Table
     const tableRows = members.map(m => [m.name, m.country, m.timezone, `${format12h(m.startTime)} - ${format12h(m.endTime)}`]);
     doc.autoTable({
-      head: [['Name', 'Country', 'Timezone', 'Working Hours (Local)']],
+      head: [['Name', 'Country', 'Timezone', 'Local Working Hours']],
       body: tableRows,
-      startY: 40,
-      theme: 'grid',
-      headStyles: { fillColor: [59, 130, 246] }
+      startY: 45,
+      theme: 'striped',
+      headStyles: { fillColor: [59, 130, 246], fontStyle: 'bold' },
+      styles: { fontSize: 10 }
     });
 
+    // Summary Section
     const overlaps = findOverlaps(members);
     const compromise = overlaps.length === 0 ? suggestCompromise(members) : null;
 
-    let finalY = doc.lastAutoTable.finalY + 15;
-    doc.setFontSize(14);
-    doc.setTextColor(0);
+    let finalY = doc.lastAutoTable.finalY + 20;
+
+    doc.setFontSize(16);
+    doc.setTextColor(17, 24, 39);
+    doc.text('Meeting Availability Summary', 14, finalY);
+
+    finalY += 10;
+    doc.setFontSize(12);
     if (overlaps.length > 0) {
-      doc.text('Best Meeting Time:', 14, finalY);
-      overlaps.forEach((o, i) => {
-        doc.setFontSize(12);
-        doc.text(`${utcMinutesToLocal(o.start, userTimezone)} - ${utcMinutesToLocal(o.end, userTimezone)} (${userTimezone})`, 14, finalY + 7 + (i * 7));
+      doc.setTextColor(16, 185, 129); // Success green
+      doc.text('Best Meeting Times (Everyone Available):', 14, finalY);
+      overlaps.forEach((o) => {
+        finalY += 7;
+        doc.setTextColor(55, 65, 81);
+        doc.text(`• ${utcMinutesToLocal(o.start, userTimezone)} - ${utcMinutesToLocal(o.end, userTimezone)}`, 20, finalY);
       });
     } else if (compromise) {
+      doc.setTextColor(245, 158, 11); // Amber
       doc.text('Optimal Compromise Time:', 14, finalY);
-      doc.setFontSize(12);
-      doc.text(`${utcMinutesToLocal(compromise.start, userTimezone)} - ${utcMinutesToLocal(compromise.end, userTimezone)} (${compromise.count} members available)`, 14, finalY + 7);
+      finalY += 7;
+      doc.setTextColor(55, 65, 81);
+      doc.text(`• ${utcMinutesToLocal(compromise.start, userTimezone)} - ${utcMinutesToLocal(compromise.end, userTimezone)}`, 20, finalY);
+      doc.setFontSize(10);
+      doc.text(`(${compromise.count} out of ${members.length} members available)`, 20, finalY + 5);
     }
 
-    doc.save('team_schedule.pdf');
+    doc.save('Team_Sync_Report.pdf');
   };
 
   const overlaps = findOverlaps(members);
@@ -95,6 +114,8 @@ const Home = () => {
         onAddMember={() => setIsModalOpen(true)}
         onExportCSV={handleExportCSV}
         onExportPDF={handleExportPDF}
+        userTimezone={userTimezone}
+        setUserTimezone={setUserTimezone}
       />
 
       <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -116,13 +137,13 @@ const Home = () => {
               />
             ))}
             {members.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+              <div className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300 shadow-sm">
                 <p className="text-gray-500">No members added yet.</p>
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="mt-4 text-blue-600 font-medium hover:underline"
+                  className="mt-4 text-blue-600 font-bold hover:underline transition-all"
                 >
-                  Add your first member
+                  + Add your first member
                 </button>
               </div>
             )}
@@ -146,14 +167,14 @@ const Home = () => {
             </>
           ) : (
             <div className="bg-white p-12 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center space-y-4 card-shadow">
-              <div className="bg-blue-50 p-4 rounded-full">
-                <svg className="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-blue-50 p-6 rounded-full shadow-inner">
+                <svg className="w-16 h-16 text-blue-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Visual Timeline</h3>
-              <p className="text-gray-500 max-w-sm">
-                Add team members to see their working hours and find the best overlapping meeting times.
+              <h3 className="text-2xl font-bold text-gray-900">Visual Timeline</h3>
+              <p className="text-gray-500 max-w-sm text-lg">
+                Add team members to see their working hours and discover the best overlapping meeting times.
               </p>
             </div>
           )}
