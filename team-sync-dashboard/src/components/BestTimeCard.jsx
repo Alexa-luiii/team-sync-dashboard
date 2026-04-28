@@ -1,4 +1,3 @@
-
 import { Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { utcMinutesToLocal } from '../utils/timezoneConverter';
 
@@ -33,7 +32,7 @@ const BestTimeCard = ({ overlaps, compromise, userTimezone }) => {
       <div className="mt-6 flex flex-wrap gap-3">
         {hasOverlap ? (
           overlaps.map((o, idx) => (
-            <div key={idx} className="bg-white px-4 py-3 rounded-lg border border-green-200 shadow-sm">
+            <div key={idx} className="bg-white px-4 py-3 rounded-lg border border-green-200 shadow-sm transition-all hover:shadow-md">
               <span className="text-2xl font-bold text-gray-900">
                 {utcMinutesToLocal(o.start, userTimezone)} – {utcMinutesToLocal(o.end, userTimezone)}
               </span>

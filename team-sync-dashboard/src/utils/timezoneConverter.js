@@ -15,21 +15,22 @@ export const localToUTCMinutes = (time, zone) => {
 
 /**
  * Converts UTC minutes to local time string in a specific timezone.
+ * Always returns 12-hour format with AM/PM.
  * @param {number} utcMinutes - Minutes from start of UTC day
  * @param {string} zone - Timezone string
- * @returns {string} - Format "HH:mm"
+ * @returns {string} - Format "h:mm a"
  */
 export const utcMinutesToLocal = (utcMinutes, zone) => {
   const utc = DateTime.fromObject({
     hour: Math.floor(utcMinutes / 60),
     minute: utcMinutes % 60
   }, { zone: 'utc' });
-  return utc.setZone(zone).toFormat('HH:mm');
+  return utc.setZone(zone).toFormat('h:mm a');
 };
 
 /**
- * Gets the current time in a specific timezone.
+ * Gets the current time in a specific timezone in 12-hour format.
  */
 export const getCurrentTimeInZone = (zone) => {
-  return DateTime.now().setZone(zone).toFormat('HH:mm');
+  return DateTime.now().setZone(zone).toFormat('h:mm a');
 };

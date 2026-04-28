@@ -1,18 +1,24 @@
 const TimelineChart = ({ members, overlaps }) => {
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
+  const formatHour = (h) => {
+    if (h === 0) return '12 AM';
+    if (h === 12) return '12 PM';
+    return h > 12 ? `${h - 12} PM` : `${h} AM`;
+  };
+
   return (
     <div className="bg-white p-6 rounded-xl border border-gray-100 card-shadow">
       <h3 className="text-lg font-bold text-gray-900 mb-6">Team Availability (UTC)</h3>
 
-      <div className="relative overflow-x-auto pb-4">
-        <div className="min-w-[800px]">
+      <div className="relative overflow-x-auto pb-4 scrollbar-hide">
+        <div className="min-w-[1000px]">
           {/* Time markers */}
           <div className="flex border-b border-gray-100 mb-2">
             <div className="w-32 flex-shrink-0"></div>
             {hours.map(h => (
-              <div key={h} className="flex-1 text-[10px] text-gray-400 text-center border-l border-gray-50 h-6">
-                {h}:00
+              <div key={h} className="flex-1 text-[9px] text-gray-400 text-center border-l border-gray-50 h-6 pt-1 whitespace-nowrap">
+                {formatHour(h)}
               </div>
             ))}
           </div>
